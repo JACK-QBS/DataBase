@@ -1,0 +1,42 @@
+数据库操作
+（1）查询，显示
+	show databases;
+（2）创建
+	直接创建（如果已经存在该数据库，报错）
+		create database 数据库名称 character set utf8mb4;
+	如果没有才创建（if 数据库不存在 创建）
+		create database if not exists 数据库名称 character set utf8mb4;
+（3）删除数据库
+	直接删（如果不存在就报错）：
+		drop database 数据库名称;
+	如果有才删
+		drop database if exists 数据库名称;
+（4）使用（出现No database selected错误，要先进入/使用数据库）
+	use 数据库名;
+
+数据类型
+	1. 数值型
+		1.1 整型
+		1.2 浮点型
+	2. 字符串类型
+	3. 日期类型
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

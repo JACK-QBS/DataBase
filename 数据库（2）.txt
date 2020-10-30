@@ -1,0 +1,64 @@
+create table stu_test (
+   id int,
+   name varchar(20) comment '姓名',
+   password varchar(50) comment '密码',
+   age int,
+   sex varchar(1),
+   birthday timestamp,
+   amout decimal(13,2),
+   resume text
+);
+
+drop table if exists xxx;
+create table xxx(
+	name varchar(20),
+	school varchar(50),
+	major varchar(20),
+	sex bit,
+	dianming bit,
+	state varchar(3)
+);
+
+
+-- 创建一张学生表
+DROP TABLE IF EXISTS student;
+CREATE TABLE student (
+    id INT,
+    sn INT comment '学号',
+    name VARCHAR(20) comment '姓名',
+    qq_mail VARCHAR(20) comment 'QQ邮箱'
+);
+
+insert into student values(1,1,'八戒',null);
+-- 插入单行数据（指定字段插入，推荐做法）
+insert into student(id,sn,name) values(2,2,'嫦娥');
+-- 插入多行数据
+insert into student(id,sn,name) values
+(3,3,'后羿'),
+(4,4,'吴刚');
+
+查询数据
+select * from student;
+select name,sn from student;
+
+drop table if exists exam_result;
+create table exam_result(
+	id int,
+	name varchar(20),
+	chinese decimal(3,1),
+	math decimal(3,1),
+	english decimal(3,1)
+);
+
+-- 插入测试数据
+INSERT INTO exam_result (id,name, chinese, math, english) VALUES
+	(1,'唐三藏', 67, 98, 56),
+	(2,'孙悟空', 87.5, 78, 77),
+	(3,'猪悟能', 88, 98, 90),
+	(4,'曹孟德', 82, 84, 67),
+	(5,'刘玄德', 55.5, 85, 45),
+	(6,'孙权', 70, 73, 78.5),
+	(7,'宋公明', 75, 65, 30);
+
+
+

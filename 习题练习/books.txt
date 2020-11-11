@@ -1,0 +1,53 @@
+
+// 图书管理
+drop table if exists books;
+create table books (
+    id int primary key auto_increment,
+	 name varchar(20),
+	 
+	foreign key (sort_id) references sorts(id)
+);
+
+drop table if exists sort;
+create table sort (
+    id int primary key auto_increment,
+	
+);
+
+drop table if exists Management;
+create table Management (
+     id int primary key auto_increment,
+	 
+	 student_id int,
+	 books_id int,
+	 foreign key (student_id) references student(id),
+	 foreign key (books_id) references books(id)
+);
+
+
+//食堂管理
+
+create table canteecah (
+    id int primary key auto_increment,
+    name varchar(10)
+);
+
+create table HO (
+    id int primary key auto_increment
+	record vachar(20),
+);
+
+create table charge (
+    id int primary key auto_increment
+	record vachar(20),
+);
+
+create table information (
+    id int primary key auto_increment,
+	canteecah_id int,
+	HO_id int,
+	charge_id int,
+	foreign key (canteecah_id) references canteecah(id),
+	foreign key (HO_id) references HO(id),
+	foreign key (charge_id) references charge(id)
+);

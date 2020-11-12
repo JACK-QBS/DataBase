@@ -1,0 +1,46 @@
+
+// 笛卡尔积
+
+drop table if exists aaa;
+create table aaa (
+       a1 varchar(20),
+       a2 varchar(20)
+);
+
+drop table if exists bbb;
+create table bbb (
+       b1 varchar(20),
+       b2 varchar(20)
+);
+
+// 插入数据
+insert into aaa values ('a','aa');
+insert into aaa values ('b','bb');
+insert into bbb values ('1','11');
+insert into bbb values ('2','22');
+
+aaa：
++------+------+
+| a1   | a2   |
++------+------+
+| a    | aa   |
+| b    | bb   |
++------+------+
+bbb:
++------+------+
+| b1   | b2   |
++------+------+
+| 1    | 11   |
+| 2    | 22   |
++------+------+
+select * from aaa,bbb; 结果：
++------+------+------+------+
+| a1   | a2   | b1   | b2   |
++------+------+------+------+
+| a    | aa   | 1    | 11   |
+| b    | bb   | 1    | 11   |
+| a    | aa   | 2    | 22   |
+| b    | bb   | 2    | 22   |
++------+------+------+------+
+
+关联表可以使用别名

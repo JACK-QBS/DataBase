@@ -1,0 +1,224 @@
+表的 CRUD 操作
+一、新增 数据（Create）：
+（1）单行数据 + 全列插入：
+（2）多行数据 + 指定列插入：
+二、查询 数据（Retrieve）：
+（1）全列查询：
+（2）指定列查询：
+（3）查询字段为表达式：
+（4）别名：
+（5）去重：( distinct )
+（6）排序：order by
+（7）条件查询：where
+（8）分页查询： limit
+三、修改 数据（Update）：
+四、删除 数据（Delete）：
+
+（ 注释：在SQL中可以使用 “- -空格+描述” 来表示注释说明）
+一、新增 数据（Create）：
+新增语句基本语法：
+
+insert into table_name values();
+
+我们先来创建一张学生表：
+
+-- 创建一张学生表
+drop table if exists student; --表示如果有 student 这个表则给删除
+create table student (
+   id int,
+   sn int comment '学号',
+   name VARCHAR(20) comment '姓名',
+   qq_mail VARCHAR(20) comment 'QQ邮箱'
+);
+
+我们往这个学生表里插数据：
+
+（1）单行数据 + 全列插入：
+-- 插入两条记录，value_list 数量必须和定义表的列的数量及顺序一致
+insert into student values(100, 10000, '唐三藏', NULL);
+insert into student values(101, 10001, '孙悟空', '11111');
+
+（2）多行数据 + 指定列插入：
+-- 插入两条记录，value_list 数量必须和指定列数量及顺序一致
+INSERT INTO student (id, sn, name) VALUES
+ (102, 20001, '曹孟德'),
+ (103, 20002, '孙仲谋');
+
+二、查询 数据（Retrieve）：
+我们先来创建一张考试成绩表并插入数据：
+
+-- 创建考试成绩表
+drop table if exists exam_result;
+create table exam_result (
+    id int,
+    name varchar(20),
+    chinese decimal(3,1),
+    math decimal(3,1),
+    english decimal(3,1)
+);
+-- 插入测试数据
+insert into exam_result (id,name, chinese, math, english) values
+ (1,'唐三藏', 67, 98, 56),
+ (2,'孙悟空', 87.5, 78, 77),
+ (3,'猪悟能', 88, 98.5, 90),
+ (4,'曹孟德', 82, 84, 67),
+ (5,'刘玄德', 55.5, 85, 45),
+ (6,'孙权', 70, 73, 78.5),
+ (7,'宋公明', 75, 65, 30);
+
+（1）全列查询：
+通常情况下我们不使用 * 进行全列查询，那是因为查询的列越多，传输的数据量就越大，查询效率就降低。。。
+
+select * from exam_result;
+1
+（2）指定列查询：
+-- 指定列的顺序不需要按定义表的顺序来
+select id,name,english from exam_result;
+
+（3）查询字段为表达式：
+-- 表达式不包含字段
+select id, name, 10 from exam_result;
+-- 表达式包含一个字段
+select id, name, english + 10 from exam_result;
+-- 表达式包含多个字段
+select id, name, chinese + math + english from exam_result;
+
+（4）别名：
+别名就是给 列名 起个 外号
+
+select id,name,chinese+math+english [as]'总分' from exam_result;
+1
+这块 我们给 chinese+math+english 起了个别名叫 总分
+（别名前边的 as 可写可不写，如果不写的话用空格代替就好）
+
+（5）去重：( distinct )
+去掉 重复的行
+
+select distinct math from exam_result;
+1
+（6）排序：order by
+– ASC 为 升序（从小到大）
+– DESC 为 降序（从大到小）
+– 默认为 ASC
+
+没有 ORDER BY 子句的查询，返回的顺序是未定义的，永远不要依赖这个顺序
+NULL 数据排序，视为比任何值都小，升序出现在最上面，降序出现在最下面
+-- 查询同学姓名和 qq_mail，按 qq_mail 排序显示
+SELECT name, qq_mail FROM student ORDER BY qq_mail;
+SELECT name, qq_mail FROM student  ORDER BY qq_mail desc;
+
+使用表达式及别名排序
+-- 查询同学及总分，由高到低
+SELECT name, chinese + english + math FROM exam_result 
+ ORDER BY chinese + english + math DESC;
+ 
+SELECT name, chinese + english + math total FROM exam_result
+ ORDER BY total DESC;
+
+可以对多个字段进行排序，排序优先级随书写顺序
+-- 查询同学各门成绩，依次按 数学降序，英语升序，语文升序的方式显示
+SELECT name, math, english, chinese FROM exam_result
+ ORDER BY math DESC, english, chinese;
+
+（7）条件查询：where
+注意：
+
+WHERE条件可以使用表达式，但不能使用别名。
+AND的优先级高于OR，在同时使用时，需要使用小括号()包裹优先执行的部分
+基本查询：
+
+-- 查询英语不及格的同学及英语成绩 ( < 60 )
+SELECT name, english FROM exam_result WHERE english < 60;
+-- 查询语文成绩好于英语成绩的同学
+SELECT name, chinese, english FROM exam_result WHERE chinese > english;
+-- 查询总分在 200 分以下的同学
+SELECT name, chinese + math + english '总分' FROM exam_result
+ WHERE chinese + math + english < 200;
+
+and 与 or
+
+-- 查询语文成绩大于80分，且英语成绩大于80分的同学
+SELECT * FROM exam_result WHERE chinese > 80 and english > 80;
+-- 查询语文成绩大于80分，或英语成绩大于80分的同学
+SELECT * FROM exam_result WHERE chinese > 80 or english > 80;
+-- 观察AND 和 OR 的优先级：
+SELECT * FROM exam_result WHERE chinese > 80 or math>70 and english > 70;
+SELECT * FROM exam_result WHERE (chinese > 80 or math>70) and english > 70;
+
+范围查询：
+1、 between … and …
+
+-- 查询语文成绩在 [80,90] 分的同学及语文成绩
+select name,chinese from exam_result where chinese between 80 and 90;
+-- 使用 and 也可以实现
+select name,chinese from exam_result where chinese >= 80 and chinese <= 90;
+2、in
+
+-- 查询数学成绩是 58 或者 59 或者 98 或者 99 分的同学及数学成绩
+SELECT name, math FROM exam_result WHERE math IN (58, 59, 98, 99);
+-- 使用 OR 也可以实现
+SELECT name, math FROM exam_result WHERE math = 58 OR math = 59 OR math
+= 98 OR math = 99;
+
+模糊查询： like
+
+-- % 匹配任意多个（包括 0 个）字符
+SELECT name FROM exam_result WHERE name LIKE '孙%';-- 匹配到孙悟空、孙权
+-- _ 匹配严格的一个任意字符
+SELECT name FROM exam_result WHERE name LIKE '孙_';-- 匹配到孙权
+
+null 的查询： is [not] null
+
+-- 查询 qq_mail 已知的同学姓名
+SELECT name, qq_mail FROM student WHERE qq_mail IS NOT NULL;
+-- 查询 qq_mail 未知的同学姓名
+SELECT name, qq_mail FROM student WHERE qq_mail IS NULL;
+
+（8）分页查询： limit
+基本格式：
+
+-- 起始下标为 0
+-- 从 0 开始，筛选 n 条结果
+SELECT ... FROM table_name [WHERE ...] [ORDER BY ...] LIMIT n;
+-- 从 s 开始，筛选 n 条结果
+SELECT ... FROM table_name [WHERE ...] [ORDER BY ...] LIMIT s, n;
+-- 从 s 开始，筛选 n 条结果，比第二种用法更明确，建议使用
+SELECT ... FROM table_name [WHERE ...] [ORDER BY ...] LIMIT n OFFSET s;
+
+举个栗子：
+
+-- 第 1 页
+SELECT id, name, math, english, chinese FROM exam_result ORDER BY id LIMIT 3
+OFFSET 0;
+-- 第 2 页
+SELECT id, name, math, english, chinese FROM exam_result ORDER BY id LIMIT 3
+OFFSET 3;
+-- 第 3 页，如果结果不足 3 个，不会有影响
+SELECT id, name, math, english, chinese FROM exam_result ORDER BY id LIMIT 3
+OFFSET 6;
+
+三、修改 数据（Update）：
+-- 将孙悟空同学的数学成绩变更为 80 分
+UPDATE exam_result SET math = 80 WHERE name = '孙悟空';
+-- 将曹孟德同学的数学成绩变更为 60 分，语文成绩变更为 70 分
+UPDATE exam_result SET math = 60, chinese = 70 WHERE name = '曹孟德';
+-- 将总成绩倒数前三的 3 位同学的数学成绩加上 30 分
+UPDATE exam_result SET math = math + 30 ORDER BY chinese + math + english LIMIT
+3;
+-- 将所有同学的语文成绩更新为原来的 2 倍
+UPDATE exam_result SET chinese = chinese * 2;
+
+四、删除 数据（Delete）：
+-- 删除孙悟空同学的考试成绩
+DELETE FROM exam_result WHERE name = '孙悟空';
+-- 删除整张表数据
+-- 准备测试表
+DROP TABLE IF EXISTS for_delete;
+CREATE TABLE for_delete (
+ id INT,
+ name VARCHAR(20)
+);
+-- 插入测试数据
+INSERT INTO for_delete (name) VALUES ('A'), ('B'), ('C');
+-- 删除整表数据
+DELETE FROM for_delete;

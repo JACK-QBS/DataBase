@@ -1,0 +1,231 @@
+一、表的约束：
+1、约束类型：
+① NOT NULL - 指示某列不能存储 NULL 值。
+② UNIQUE - 保证某列的每行必须有唯一的值。
+③ DEFAULT - 规定没有给列赋值时的默认值。
+④ PRIMARY KEY - NOT NULL 和 UNIQUE 的结合。确保某列（或两个列多个列的结合）有唯一标识，有助于更容易更快速地找到表中的一个特定的记录。
+⑤ FOREIGN KEY - 保证一个表中的数据匹配另一个表中的值的参照完整性。
+⑥ CHECK - 保证列中的值符合指定的条件。对于MySQL数据库，对CHECK子句进行分析，但是忽略CHECK子句
+
+2、Null 约束：
+创建表时，可以指定某列不为空：
+
+drop table if exists student; -- 如果有 student 这个表则删除
+create table student (
+    id int not null
+);
+
+3、Unique： 唯一约束
+指定 sn 列为唯一的、不重复的：
+
+drop table if exists student;-- 如果有 student 这个表则删除
+create table student (
+    id int not null,
+    sn int unique
+);
+
+4、Default ：默认值约束
+指定插入数据时，name 列为空，默认值unkown：
+
+drop table if exists student;-- 如果有 student 这个表则删除
+create table student (
+    id int not null,
+    sn int unique，
+    name varchar(20) default 'unkown'
+);
+
+5、Primary key ：主键约束
+指定 id 列为主键：
+
+drop table if exists student;-- 如果有 student 这个表则删除
+create table student (
+    id int not null primary key,
+    sn int unique，
+    name varchar(20) default 'unkown'
+);
+
+对于整数类型的主键，常配搭自增长 auto_increment 来使用。插入数据对应字段不给值时，使用最大值+1
+
+-- 主键是 NOT NULL 和 UNIQUE 的结合，可以不用 NOT NULL
+id INT PRIMARY KEY auto_increment,
+
+6、Foreign key ：外键约束
+外键用于关联其他表的 主键 或 唯一键
+
+创建一个班级表 classes ，id 为主键
+
+-- 使用 MySQL 关键字作为字段时，需要使用 '' 来标识
+DROP TABLE IF EXISTS classes;
+CREATE TABLE classes (
+    id INT PRIMARY KEY auto_increment,
+    name VARCHAR(20),
+    `desc` VARCHAR(100)
+);
+
+创建学生表student，一个学生对应一个班级，一个班级对应多个学生。使用id为主键，
+classes_id为外键，关联班级表id
+
+-- 重新设置学生表结构
+DROP TABLE IF EXISTS student;
+CREATE TABLE student (
+    id INT PRIMARY KEY auto_increment,
+    sn INT UNIQUE,
+    name VARCHAR(20) DEFAULT 'unkown',
+
+    classes_id int,
+    FOREIGN KEY (classes_id) REFERENCES classes(id)
+);
+7、Check 约束：
+MySQL使用时不报错，但忽略该约束：
+
+drop table if exists test_user;
+create table test_user (
+   id int,
+   name varchar(20),
+   sex varchar(1),
+   check (sex ='男' or sex='女')
+);
+
+二、表的查询：
+1、聚合查询：
+（1）聚合函数：
+函数	解释说明
+count()	查询数据的 数量
+sum()	查询数据 (数字) 的 总和
+avg()	查询数据 (数字) 的 平均值
+max()	查询数据 (数字) 的 最大值
+min()	查询数据 (数字) 的 最小值
+举个栗子：
+① count:
+
+-- 统计班级共有多少同学
+SELECT COUNT(*) FROM student;
+SELECT COUNT(0) FROM student;
+-- 统计班级收集的 qq_mail 有多少个，qq_mail 为 NULL 的数据不会计入结果
+SELECT COUNT(qq_mail) FROM student;
+
+② sum:
+
+-- 统计数学成绩总分
+SELECT SUM(math) FROM exam_result;
+-- 不及格 < 60 的总分，没有结果，返回 NULL
+SELECT SUM(math) FROM exam_result WHERE math < 60;
+
+③ avg:
+
+-- 统计平均总分
+SELECT AVG(chinese + math + english) '平均总分' FROM exam_result;
+
+④ max:
+
+-- 返回英语最高分
+SELECT MAX(english) FROM exam_result;
+
+⑤ min:
+
+-- 返回 > 70 分以上的数学最低分
+SELECT MIN(math) FROM exam_result WHERE math > 70;
+
+2）分组查询 (group by)：
+SELECT 中使用 GROUP BY 子句可以对指定列进行分组查询。
+需要满足：使用 GROUP BY 进行分组查询时，SELECT 指定的字段必须是“分组依据字段”，其他字段若想出现在SELECT 中则必须包含在聚合函数中
+
+举个栗子：
+准备一张 职员表，包括 id、姓名、角色、薪水
+
+create table emp(
+    id int primary key auto_increment,
+    name varchar(20) not null,
+    role varchar(20) not null,
+    salary numeric(11,2)
+);
+insert into emp(name, role, salary) values
+('孙悟空','刺客', 999.11),
+('猪无能','坦克', 333.5),
+('沙和尚','战士', 700.33),
+('隔壁老王','董事长', 12000.66);
+
+查询每个角色的最高工资、最低工资和平均工资
+
+select role,max(salary),min(salary),avg(salary) from emp group by role;
+having:
+GROUP BY 子句进行分组以后，需要对分组 结果 再进行 条件过滤 时，不能使用 WHERE 语句，而需要用HAVING
+显示平均工资低于1500的角色和它的平均工资:
+
+select role,max(salary),min(salary),avg(salary) from emp group by role having avg(salary)<1500;
+2、联合查询：
+实际开发中往往数据来自不同的表，所以需要多表联合查询。
+
+多表查询是对多张表的数据取 笛卡尔积：
+
+（1）内连接、外连接：
+内连接和外连接的区别（面试）：
+
+（2）自连接：
+自连接是指在 同一张表 连接 自身 进行查询：
+
+举个栗子：
+显示所有“计算机原理”成绩比“Java”成绩高的成绩信息
+
+-- 先查询“计算机原理”和“Java”课程的id
+select id,name from course where name='Java' or name='计算机原理';
+-- 再查询成绩表中，“计算机原理”成绩比“Java”成绩 高的信息
+SELECT s1.* FROM score s1, score s2 WHERE s1.student_id = s2.student_id
+ AND s1.score < s2.score
+ AND s1.course_id = 1
+ AND s2.course_id = 3;
+
+-- 也可以使用join on 语句来进行自连接查询
+SELECT s1.* FROM score s1 JOIN score s2 ON s1.student_id = s2.student_id
+ AND s1.score < s2.score
+ AND s1.course_id = 1
+ AND s2.course_id = 3;
+
+以上查询只显示了成绩信息，并且是分布执行的。
+要显示学生及成绩信息，并在一条语句显示：
+
+SELECT stu.*, s1.score Java, s2.score 计算机原理 FROM score s1
+ JOIN score s2 ON s1.student_id = s2.student_id
+ JOIN student stu ON s1.student_id = stu.id
+ JOIN course c1 ON s1.course_id = c1.id
+ JOIN course c2 ON s2.course_id = c2.id
+ AND s1.score < s2.score
+ AND c1.NAME = 'Java'
+ AND c2.NAME = '计算机原理';
+
+（3）子查询：
+子查询是指 嵌入 在其他sql语句中的select语句，也叫 嵌套查询
+① 单行 子查询：返回一行记录的子查询
+查询与 “考研” 同学的同班同学：
+
+select * from student where class_id = 
+(select classes_id from student where name = '考研');
+
+② 多行 子查询：返回多行记录的子查询
+查询“语文”或“英文”课程的成绩信息：
+
+select * from score where course_id in 
+(select id from course where name='语文' or name='英文');
+
+select * from score sco where exists 
+(select sco.id from course cou where (name='语文' or name='英文') and cou.id = sco.course_id);
+
+（4）合并查询：
+在实际应用中，为了合并多个select的执行结果，可以使用集合操作符 union，union all。使用UNION和UNION ALL时，前后查询的结果集中，字段需要一致。
+
+① union
+该操作符用于取得两个结果集的 并集。当使用该操作符时，会 自动去掉 结果集中的 重复行。
+查询id小于3，或者名字为“英文”的课程：
+
+select * from course where id < 3 union
+select * from course where name='英文';
+-- 或者使用or来实现
+select * from course where id<3 or name='英文';
+
+② union all
+该操作符用于取得两个结果集的 并集。当使用该操作符时，不会去掉 结果集中的 重复行。
+查询id小于3，或者名字为 “java” 的课程
+
+-- 可以看到结果集中出现重复数据 java
+select * from course where id < 3 union all 
+select * from course where name = '英文';
